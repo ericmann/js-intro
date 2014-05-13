@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>JavaScript: Front-end Script Magic</title>
+
+	<meta name="description" content="Front-end Script Magic">
+	<meta name="author" content="Eric Mann">
+	<link rel="publisher" href="https://plus.google.com/111597115655849308724/posts"/>
+
+	<meta property="og:locale" content="en_US" />
+	<meta property="og:type" content="article" />
+	<meta property="og:title" content="Javascript" />
+	<meta property="og:description" content="Front-end Script Magic" />
+	<meta property="og:url" content="https://github.com/ericmann/js-intro" />
+	<meta property="og:site_name" content="Eric A Mann" />
+	<meta property="article:tag" content="javascript" />
+	<meta property="article:section" content="Technology" />
+	<meta property="article:published_time" content="2014-05-14T08:00:28+00:00" />
+	<meta property="article:modified_time" content="2014-05-14T08:00:28+00:00" />
+	<meta property="og:updated_time" content="2014-05-14T08:00:28+00:00" />
+	<meta property="fb:admins" content="11502727" />
+	<meta name="twitter:card" content="summary"/>
+	<meta name="twitter:site" content="@ericmann"/>
+	<meta name="twitter:domain" content="Eric A Mann"/>
+	<meta name="twitter:creator" content="@ericmann"/>
+
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+	<link rel="stylesheet" href="bower_components/reveal.js/css/reveal.min.css">
+	<link rel="stylesheet" href="bower_components/reveal.js/css/theme/beige.css" id="theme">
+
+	<!-- For syntax highlighting -->
+	<link rel="stylesheet" href="bower_components/reveal.js/lib/css/zenburn.css">
+
+	<!-- If the query includes 'print-pdf', include the PDF print sheet -->
+	<script>
+		if( window.location.search.match( /print-pdf/gi ) ) {
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = 'css/print/pdf.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		}
+	</script>
+
+	<!--[if lt IE 9]>
+	<script src="bower_components/reveal.js/lib/js/html5shiv.js"></script>
+	<![endif]-->
+</head>
+<body>
+	<div class="reveal">
+		<div class="slides">
+
+			<section>
+				<h1>JavaScript</h1>
+				<h4>Front-end Script Magic</h4>
+				<p>
+					<small><a href="http://eamann.com">Eric Mann</a> / <a href="https://twitter.com/ericmann">@ericmann</a> / <a href="http://10up.com">10up</a></small>
+				</p>
+			</section>
+
+			<section>
+				<section><h2>Scope</h2></section>
+
+				<section>
+					<h2>Scope Pollution</h2>
+					<pre><code data-trim>
+function test_function() {
+  counter += 1;
+  console.log( "counter = " + counter );
+}
+
+test_function();        // Error: counter is not defined
+
+var counter = 0;
+test_function();        // "counter = 1"
+
+console.log( counter ); // "1"
+					</code></pre>
+				</section>
+
+				<section>
+					<h2>Explicit Scoping</h2>
+					<pre><code data-trim>
+var test_function = ( function() {
+  var counter = 0;
+
+  return function() {
+    counter += 1;
+    console.log( "counter = " + counter );
+  }
+} )();
+
+test_function();        // "counter = 1"
+
+console.log( counter ); // Error: counter is not defined
+
+var counter = 25;
+test_function();        // "counter = 2"
+console.log( counter ); // "25"
+					</code></pre>
+				</section>
+
+				<section>
+					<p>Anything not declared with <code>var</code> keyword is assumed to be global.</p>
+				</section>
+
+				<section>
+					<h2>Accessing Globals</h2>
+					<pre><code data-trim>
+var test_function = ( function() {
+  var counter = 0;
+
+  return function() {
+    counter += 1;
+    window.counter += 1; // Access a variable in the global scope
+    console.log( "counter = " + counter );
+  }
+} )();
+
+test_function();        // "counter = 1"
+
+console.log( counter ); // "NaN"
+
+var counter = 25;
+test_function();        // "counter = 1"
+console.log( counter ); // "26"
+					</code></pre>
+				</section>
+
+				<section>
+					<h2>Immediately-invoked Function Expression</h2>
+					<pre><code data-trim>
+var loud_object = 'This is noisy and annoying.';
+
+( function() {
+  // Anything defined inside these brackets will generally be invisible
+  // to the global scope unless you explicitly pass it out of the closure.
+
+  var my_private_thing = "shh ... it's a secret";
+
+  console.log( window.loud_object ); // "This is noisy and annoying."
+
+  broken_object = "Don't forget var!"; // Will be in the global scope!
+} )();
+
+console.log( my_private_thing ); // Error
+console.log( broken_object );    // "Will be in the global scope!"
+					</code></pre>
+				</section>
+			</section>
+
+			<section>
+				<section><h2>this and that</h2></section>
+
+				<section>
+					<p><code>this</code> is the most confusing part of JavaScript.</p>
+					<p>It means different things in different contexts.</p>
+				</section>
+
+				<section>
+					<h2>Globally</h2>
+					<p>In the global scope, <code>this</code> is a reference to <code>window</code>.</p>
+					<pre><code data-trim>
+console.log(this.document === document); // true
+console.log(this === window);            // true
+this.a = 37;
+console.log(window.a);                   // 37
+					</code></pre>
+				</section>
+
+				<section>
+					<h2>Functions</h2>
+					<p>In a function, it depends on whether you're in strict mode or not.</p>
+					<p>Usually, <code>this</code> will again reference <code>window</code>.</p>
+					<p>In strict mode, it's whatever it was set to before the function call.</p>
+					<pre><code data-trim>
+function f1() { return this; }
+function f2() { "use strict"; return this; }
+
+console.log( f1() );        // window
+
+console.log( f2() );        // undefined
+console.log( window.f2() ); // window
+					</code></pre>
+				</section>
+
+				<section>
+					<h2>Object Methods</h2>
+					<p>Whether built in an explicit object, through a constructor or through prototypical inheritance, <code>this</code> is bound to the object owning the method.</p>
+					<pre><code data-trim>
+var obj = { prop: 42 };
+
+function method_call() {
+  return this.prop;
+}
+
+obj.method = method_call;
+
+console.log( method_call() ); // Undefined
+console.log( obj.method() );  // 42
+					</code></pre>
+				</section>
+
+				<section>
+					<h2>Using <code>that</code></h2>
+					<p>In general, use <code>this</code> infrequently. Create a <i>copy</i> of the object reference and store it either in <code>this</code> or <code>SELF</code> for future use.</p>
+					<pre><code data-trim>
+function My_Object() {
+  var SELF = this;
+
+  SELF.prop = 42;
+
+  SELF.method_call = function() {
+    return SELF.prop;
+  };
+}
+
+var obj = new My_Object();
+console.log( obj.method_call() ); // 42
+					</code></pre>
+				</section>
+			</section>
+
+			<section>
+				<section><h2>Asynchronous Awesomesauce</h2></section>
+			</section>
+
+			<section>
+				<section><h2>The New Shiny</h2></section>
+			</section>
+
+		</div>
+	</div>
+
+	<script src="bower_components/reveal.js/lib/js/head.min.js"></script>
+	<script src="bower_components/reveal.js/js/reveal.min.js"></script>
+
+	<script>
+
+		// Full list of configuration options available here:
+		// https://github.com/hakimel/reveal.js#configuration
+		Reveal.initialize({
+			controls: true,
+			progress: true,
+			history: true,
+			center: true,
+
+			theme: 'beige',
+			transition: 'fade',
+
+			// Optional libraries used to extend on reveal.js
+			dependencies: [
+				{ src: 'bower_components/reveal.js/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+				{ src: 'bower_components/reveal.js/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+				{ src: 'bower_components/reveal.js/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+				{ src: 'bower_components/reveal.js/plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+				{ src: 'bower_components/reveal.js/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+			]
+		});
+
+	</script>
+</body>
+</html>
