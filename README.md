@@ -1,3 +1,3 @@
-# Monkeys in the Machine #
+# JavaScript - An Introduction #
 
-Use web workers wrapped in jQuery Deferreds to asychronously create virtual monkeys who can write flawless Shakespeare.
+A high-level introduction to the most common concepts in JavaScript.
